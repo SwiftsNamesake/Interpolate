@@ -13,3 +13,7 @@ Jonatan H Sundqvist ([jonatanhsundqvist@gmail.com](mailto:jonatanhsundqvist@gmai
 
 TODO
 ----
+* Introduce ticket system, invite contributors
+* Create dev branch
+* Finish the library
+* Write documentation
