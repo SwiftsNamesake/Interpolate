@@ -22,7 +22,7 @@ synopsis:            Python style string formatting brought to Haskell.
 license:             MIT
 
 -- The file containing the license text.
-license-file:        LICENSE
+license-file:        LICENSE.md
 
 -- The package author(s).
 author:              Jonatan H Sundqvist
@@ -59,7 +59,8 @@ library
   -- Other library packages from which modules are imported.
   build-depends:       base >=4.7 && <4.8,
                        parsec,
-                       bytestring
+                       bytestring,
+                       mtl
 
   -- Directories containing source files.
   hs-source-dirs:      lib
