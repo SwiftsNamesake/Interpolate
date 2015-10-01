@@ -45,8 +45,11 @@ import Data.String
 -- Types -----------------------------------------------------------------------------------------------------------------------------------
 
 -- |
-data FormatToken i s = PlainString s | Specifier i
+data FormatToken s i = PlainToken s | SpecifierToken (Specifier s i)
 
+
+-- |
+data Specifier s i = Specifier s i
 
 -- Classes ---------------------------------------------------------------------------------------------------------------------------------
 
