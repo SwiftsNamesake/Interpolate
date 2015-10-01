@@ -80,24 +80,26 @@ unescaped = fromString <$> (:[]) <$> Parsec.noneOf "{}"
 
 -- |
 openescape :: (Stream s' Identity Char, IsString s) => ParsecT s' u Identity s -- [FormatToken s i]
-openescape = generic $ Parsec.string "{{"
+openescape = string "{{"
 
 
 -- |
 closeescape :: (Stream s' Identity Char, IsString s) => ParsecT s' u Identity s -- [FormatToken s i]
-closeescape = generic $ Parsec.string "}}"
+closeescape = string "}}"
 
 
 -- |
-open = error ""
+open :: (Stream s' Identity Char, IsString s) => ParsecT s' u Identity s
+open = string "{"
 
 
 -- |
-close = undefined
+close :: (Stream s' Identity Char, IsString s) => ParsecT s' u Identity s
+close = string "}"
 
 
 -- |
-specifier :: IsString s => ParsecT s' u Identity (FormatToken s i)
+specifier :: (Stream s' Identity Char, IsString s) => ParsecT s' u Identity (FormatToken s i)
 specifier = do
   open
   (key, spec) <- undefined
@@ -108,5 +110,5 @@ specifier = do
 
 -- |
 -- generic ::
-generic :: IsString s => ParsecT s' u Identity String -> ParsecT s' u Identity s
-generic = (fromString <$>)
+string :: (Stream s' Identity Char, IsString s) => String -> ParsecT s' u Identity s
+string str = fromString <$> Parsec.string str

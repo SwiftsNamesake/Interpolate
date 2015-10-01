@@ -51,7 +51,7 @@ library
   -- exposed-modules:
 
   -- Modules included in this library but not exported.
-  other-modules:       Interpolate, Interpolate.Types, Interpolate.Parse
+  other-modules:       Interpolate, Interpolate.Types, Interpolate.Parse, Interpolate.Interpolate
 
   -- LANGUAGE extensions used by modules in this package.
   -- other-extensions:
