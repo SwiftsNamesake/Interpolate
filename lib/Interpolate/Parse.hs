@@ -16,9 +16,12 @@
 --        - Allow arbitrary monad transformers
 --        - Devise some way of specifying what parameters are valid for anyg iven FormatArg type
 --          -- Type-specific specifiers
+--        - Empty formatting specifiers (?)
 
 -- SPEC | -
 --        -
+
+-- cf. https://docs.python.org/3.4/library/string.html#formatspec
 
 
 
@@ -61,13 +64,12 @@ import Interpolate.Types
 -- parseformat :: IsString string => string -> a
 -- ParsecT s u m a is a parser with stream type s, user state type u, underlying monad m and return type a.
 -- TODO: Escaping '}'
---                                              ↓                  ↓                   ↓                 ↓
-parseformat :: (Stream s' Identity Char, Monoid s, IsString s) => ParsecT s' u Identity [FormatToken s i]
+parseformat :: (Stream s' Identity Char, Monoid s, FormatKey k, IsString s) => ParsecT s' u Identity [FormatToken s k]
 parseformat = Parsec.many (plain <|> specifier)
 
 
 -- |
-plain :: forall s' s u i. (Stream s' Identity Char, Monoid s, IsString s) => ParsecT s' u Identity (FormatToken s i)
+plain :: (Stream s' Identity Char, Monoid s, FormatKey k, IsString s) => ParsecT s' u Identity (FormatToken s k)
 plain = do
   s <- Parsec.many $ unescaped <|> openescape <|> closeescape -- TODO: Find a way of flattening
   return . PlainToken $ mconcat s
@@ -79,12 +81,12 @@ unescaped = fromString <$> (:[]) <$> Parsec.noneOf "{}"
 
 
 -- |
-openescape :: (Stream s' Identity Char, IsString s) => ParsecT s' u Identity s -- [FormatToken s i]
+openescape :: (Stream s' Identity Char, IsString s) => ParsecT s' u Identity s
 openescape = string "{{"
 
 
 -- |
-closeescape :: (Stream s' Identity Char, IsString s) => ParsecT s' u Identity s -- [FormatToken s i]
+closeescape :: (Stream s' Identity Char, IsString s) => ParsecT s' u Identity s
 closeescape = string "}}"
 
 
@@ -99,13 +101,20 @@ close = string "}"
 
 
 -- |
-specifier :: (Stream s' Identity Char, IsString s) => ParsecT s' u Identity (FormatToken s i)
+-- TOOD: Rename (?)
+specifier :: (Stream s' Identity Char, FormatKey k, IsString s) => ParsecT s' u Identity (FormatToken s k)
 specifier = do
   open
-  (key, spec) <- undefined
+  (key, spec) <- formatspec
   close
   return $ SpecifierToken (Specifier key spec)
 
+
+-- |
+formatspec :: (Stream s' Identity Char, FormatKey k, IsString s) => ParsecT s' u Identity (s, k)
+formatspec = do
+  undefined
+-- [[fill]align][sign][#][0][width][,][.precision][type]
 
 
 -- |

@@ -1,6 +1,6 @@
 -- |
 -- Module      : Interpolate.Interpolate
--- Description :
+-- Description : Defines the machinery for applying formatting based on specifiers and interpolating the format string
 -- Copyright   : (c) Jonatan H Sundqvist, 2015
 -- License     : MIT
 -- Maintainer  : Jonatan H Sundqvist

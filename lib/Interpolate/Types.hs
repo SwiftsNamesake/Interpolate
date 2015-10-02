@@ -11,7 +11,7 @@
 -- Created September 30 2015
 
 -- TODO | - Deriving, templates (?)
---        -
+--        - Expose key class or lock to string keys and indices (?)
 
 -- SPEC | -
 --        -
@@ -45,11 +45,12 @@ import Data.String
 -- Types -----------------------------------------------------------------------------------------------------------------------------------
 
 -- |
-data FormatToken s i = PlainToken s | SpecifierToken (Specifier s i)
+data FormatToken s k = PlainToken s | SpecifierToken (Specifier s k)
 
 
 -- |
-data Specifier s i = Specifier s i
+-- TODO: Figure out how to represent format specs
+data Specifier s k = Specifier s k
 
 -- Classes ---------------------------------------------------------------------------------------------------------------------------------
 
@@ -60,4 +61,4 @@ class FormatArg arg where
 
 -- |
 class FormatKey key where
-  match :: key -- TODO: Rename, write proper signatures
+  match :: IsString s => s -> key -- TODO: Rename, write proper signatures
