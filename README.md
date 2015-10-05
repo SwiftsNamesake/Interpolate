@@ -2,7 +2,7 @@ Interpolate
 ===========
 Python style string formatting brought to Haskell.
 
-    λ>format "I can't believe {0}"
+    λ> format "I can't believe {0}"
     "I can't believe"
 
 

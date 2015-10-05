@@ -64,15 +64,21 @@ import Interpolate.Types
 -- parseformat :: IsString string => string -> a
 -- ParsecT s u m a is a parser with stream type s, user state type u, underlying monad m and return type a.
 -- TODO: Escaping '}'
-parseformat :: (Stream s' Identity Char, Monoid s, FormatKey k, IsString s) => ParsecT s' u Identity [FormatToken s k]
-parseformat = Parsec.many (plain <|> specifier)
+parseformat :: (Stream s' Identity Char, Monoid s, IsString s) => ParsecT s' u Identity [FormatToken k s]
+parseformat = Parsec.many (Parsec.try plain <|> specifier)
 
 
 -- |
-plain :: (Stream s' Identity Char, Monoid s, FormatKey k, IsString s) => ParsecT s' u Identity (FormatToken s k)
-plain = do
-  s <- Parsec.many $ unescaped <|> openescape <|> closeescape -- TODO: Find a way of flattening
-  return . PlainToken $ mconcat s
+-- TODO: unescape
+-- TODO: Rename (?)
+-- TODO: Fix backtracking behaviour (should be non-greedy)
+literaltext  :: (Stream s' Identity Char, Monoid s, IsString s) => ParsecT s' u Identity s
+literaltext = mconcat <$> Parsec.many1 (Parsec.try unescaped <|> (Parsec.try openescape <|> closeescape) ) -- TODO: Find a way of flattening
+
+
+-- |
+plain :: (Stream s' Identity Char, Monoid s, IsString s) => ParsecT s' u Identity (FormatToken k s)
+plain = PlainToken <$> literaltext
 
 
 -- |
@@ -101,17 +107,32 @@ close = string "}"
 
 
 -- |
--- TOOD: Rename (?)
-specifier :: (Stream s' Identity Char, FormatKey k, IsString s) => ParsecT s' u Identity (FormatToken s k)
-specifier = do
+format :: (Stream s' Identity Char, Monoid s, IsString s) => ParsecT s' u Identity (FormatToken k s)
+format = do
   open
-  (key, spec) <- formatspec
+  k <- key
+  string ":"
+  s <- specifier
   close
-  return $ SpecifierToken (Specifier key spec)
+  return $ SpecifierToken (k, s)
 
 
 -- |
-formatspec :: (Stream s' Identity Char, FormatKey k, IsString s) => ParsecT s' u Identity (s, k)
+key ::  (Stream s' Identity Char) => ParsecT s' u Identity (Key i s)
+key = undefined
+
+
+-- |
+-- TOOD: Rename (?)
+specifier :: (Stream s' Identity Char, Monoid s, IsString s) => ParsecT s' u Identity (Specifier s)
+specifier = do
+  -- (key, spec) <- formatspec
+  spec <- mconcat <$> Parsec.many1 unescaped
+  return $ Specifier spec
+
+
+-- |
+formatspec :: (Stream s' Identity Char, IsString s) => ParsecT s' u Identity (k s)
 formatspec = do
   undefined
 -- [[fill]align][sign][#][0][width][,][.precision][type]
