@@ -60,7 +60,8 @@ library
   build-depends:       base >=4.7 && <4.8,
                        parsec,
                        bytestring,
-                       mtl
+                       mtl,
+                       containers
 
   -- Directories containing source files.
   hs-source-dirs:      lib

@@ -48,16 +48,16 @@ import Data.String
 
 -- |
 -- TODO: Rename (?)
-data FormatToken i s = PlainToken s | SpecifierToken (Key i s, Specifier s) deriving (Show)
+data FormatToken i s = PlainToken s | SpecifierToken (Key i s, Specifier s) deriving (Show, Eq)
 
 
 -- |
-data Key i s = StringKey s  | IndexKey i | EmptyKey deriving (Show)
+data Key i s = StringKey s  | IndexKey i | EmptyKey deriving (Show, Eq)
 
 
 -- |
 -- TODO: Figure out how to represent format specs
-data Specifier s = Specifier s deriving (Show)
+data Specifier s = Specifier s deriving (Show, Eq)
 
 
 -- |
@@ -73,8 +73,8 @@ type Format k s = (Key k s, Specifier s)
 -- Classes ---------------------------------------------------------------------------------------------------------------------------------
 
 -- |
-class FormatArg arg where
-  interpolate :: IsString str => str -> (str, arg)
+-- class FormatArg arg where
+--   interpolate :: IsString str => str -> (str, arg)
 
 
 -- |

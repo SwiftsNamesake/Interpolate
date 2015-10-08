@@ -47,7 +47,7 @@ module Interpolate.Parse where
 import qualified Text.Parsec as Parsec
 import           Text.Parsec ((<?>), (<|>), ParsecT, Stream)
 
-import Data.Functor ((<$>))
+import Data.Functor ((<$>), (<$))
 import Data.Monoid
 import Data.String
 import Control.Monad.Identity
@@ -64,8 +64,9 @@ import Interpolate.Types
 -- parseformat :: IsString string => string -> a
 -- ParsecT s u m a is a parser with stream type s, user state type u, underlying monad m and return type a.
 -- TODO: Escaping '}'
-parseformat :: (Stream s' Identity Char, Monoid s, IsString s) => ParsecT s' u Identity [FormatToken k s]
-parseformat = Parsec.many (Parsec.try plain <|> specifier)
+-- TODO: Rename (?)
+parseformat :: (Stream s' Identity Char, Monoid s, IsString s, Integral i, Read i) => ParsecT s' u Identity [FormatToken i s]
+parseformat = Parsec.many (Parsec.try plain <|> format)
 
 
 -- |
@@ -88,38 +89,42 @@ unescaped = fromString <$> (:[]) <$> Parsec.noneOf "{}"
 
 -- |
 openescape :: (Stream s' Identity Char, IsString s) => ParsecT s' u Identity s
-openescape = string "{{"
+openescape = "{" <$ string "{{"
 
 
 -- |
 closeescape :: (Stream s' Identity Char, IsString s) => ParsecT s' u Identity s
-closeescape = string "}}"
+closeescape = "}" <$ string "}}"
 
 
 -- |
-open :: (Stream s' Identity Char, IsString s) => ParsecT s' u Identity s
-open = string "{"
+-- open :: (Stream s' Identity Char, IsString s) => ParsecT s' u Identity s
+-- open = string "{"
+--
+--
+-- -- |
+-- close :: (Stream s' Identity Char, IsString s) => ParsecT s' u Identity s
+-- close = string "}"
 
 
 -- |
-close :: (Stream s' Identity Char, IsString s) => ParsecT s' u Identity s
-close = string "}"
-
-
--- |
-format :: (Stream s' Identity Char, Monoid s, IsString s) => ParsecT s' u Identity (FormatToken k s)
+format :: (Stream s' Identity Char, Monoid s, IsString s, Integral i, Read i) => ParsecT s' u Identity (FormatToken i s)
 format = do
-  open
+  Parsec.string "{"
   k <- key
-  string ":"
-  s <- specifier
-  close
-  return $ SpecifierToken (k, s)
+  -- string ":"
+  -- s <- specifier
+  Parsec.string "}"
+  return $ SpecifierToken (k, Specifier "undefined")
 
 
 -- |
-key ::  (Stream s' Identity Char) => ParsecT s' u Identity (Key i s)
-key = undefined
+-- TODO: This needs a lot of work
+key ::  (Stream s' Identity Char, IsString s, Integral i, Read i) => ParsecT s' u Identity (Key i s)
+key = (IndexKey . read <$> Parsec.try indexed) <|> (StringKey <$> Parsec.try named) <|> return EmptyKey
+  where
+    indexed = fromString <$> (Parsec.many1 $ Parsec.digit)
+    named   = fromString <$> (Parsec.many1 $ Parsec.noneOf "{} \n\t")
 
 
 -- |
