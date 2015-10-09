@@ -65,7 +65,7 @@ import Interpolate.Types
 -- ParsecT s u m a is a parser with stream type s, user state type u, underlying monad m and return type a.
 -- TODO: Escaping '}'
 -- TODO: Rename (?)
-parseformat :: (Stream s' Identity Char, Monoid s, IsString s, Integral i, Read i) => ParsecT s' u Identity [FormatToken i s]
+parseformat :: (Stream s' Identity Char) => ParsecT s' u Identity [FormatToken]
 parseformat = Parsec.many (Parsec.try plain <|> format)
 
 
@@ -78,7 +78,7 @@ literaltext = mconcat <$> Parsec.many1 (Parsec.try unescaped <|> (Parsec.try ope
 
 
 -- |
-plain :: (Stream s' Identity Char, Monoid s, IsString s) => ParsecT s' u Identity (FormatToken k s)
+plain :: (Stream s' Identity Char) => ParsecT s' u Identity (FormatToken)
 plain = PlainToken <$> literaltext
 
 
@@ -108,7 +108,7 @@ closeescape = "}" <$ string "}}"
 
 
 -- |
-format :: (Stream s' Identity Char, Monoid s, IsString s, Integral i, Read i) => ParsecT s' u Identity (FormatToken i s)
+format :: (Stream s' Identity Char) => ParsecT s' u Identity (FormatToken)
 format = do
   Parsec.string "{"
   k <- key
@@ -120,7 +120,7 @@ format = do
 
 -- |
 -- TODO: This needs a lot of work
-key ::  (Stream s' Identity Char, IsString s, Integral i, Read i) => ParsecT s' u Identity (Key i s)
+key ::  (Stream s' Identity Char) => ParsecT s' u Identity (Key)
 key = (IndexKey . read <$> Parsec.try indexed) <|> (StringKey <$> Parsec.try named) <|> return EmptyKey
   where
     indexed = fromString <$> (Parsec.many1 $ Parsec.digit)
@@ -129,7 +129,7 @@ key = (IndexKey . read <$> Parsec.try indexed) <|> (StringKey <$> Parsec.try nam
 
 -- |
 -- TOOD: Rename (?)
-specifier :: (Stream s' Identity Char, Monoid s, IsString s) => ParsecT s' u Identity (Specifier s)
+specifier :: (Stream s' Identity Char) => ParsecT s' u Identity (Specifier)
 specifier = do
   -- (key, spec) <- formatspec
   spec <- mconcat <$> Parsec.many1 unescaped

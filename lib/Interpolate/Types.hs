@@ -48,20 +48,20 @@ import Data.String
 
 -- |
 -- TODO: Rename (?)
-data FormatToken i s = PlainToken s | SpecifierToken (Key i s, Specifier s) deriving (Show, Eq)
+data FormatToken = PlainToken String | SpecifierToken (Key, Specifier) deriving (Show, Eq)
 
 
 -- |
-data Key i s = StringKey s  | IndexKey i | EmptyKey deriving (Show, Eq)
+data Key = StringKey String  | IndexKey Int | EmptyKey deriving (Show, Ord, Eq)
 
 
 -- |
 -- TODO: Figure out how to represent format specs
-data Specifier s = Specifier s deriving (Show, Eq)
+data Specifier = Specifier String deriving (Show, Eq)
 
 
 -- |
-type Format k s = (Key k s, Specifier s)
+type Format = (Key, Specifier)
 
 --------------------------------------------------------------------------------------------------------------------------------------------
 

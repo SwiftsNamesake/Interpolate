@@ -72,54 +72,47 @@ interpolate text = undefined
 -- format
 
 
+-- Types (should be moved) -----------------------------------------------------------------------------------------------------------------
+
 -- |
 -- TODO: Move
 -- TODO: Remove, use existential quantification for heterogenous lists, or interpolate incrementally (?)
 -- data FormatItem i s = IntegerItem s | StringItem s
 -- TODO: Use (:=) operator instead (?)
-data FormatWrapper = forall a k. (FormatKey k, FormatItem a) => FormatWrapper k a
+-- data FormatWrapper = forall a k. (FormatKey k, FormatItem a) => FormatWrapper k a
+data FormatWrapper = forall a k s i. (FormatItem a, Integral i, IsString s) => FormatWrapper (Key i s) a
 
 
+-- |
 class FormatItem a where
   -- TODO: Rename (?)
   format :: (IsString s) => Specifier s -> a -> s
   wrap   :: a -> FormatWrapper
 
 
+-- | This class implements the varargs behaviour
 class FormatArg a where
-  -- TODO: Rename
-  -- format :: String -> a -> String
-  -- collect :: (FormatItem a, FormatArg b) => [FormatWrapper] -> a -> b
   collect :: [FormatWrapper] -> a
 
 
--- instance (Show s, Arg b) => Arg ((->) s b) where
---   apply' frmt i = apply' (frmt ++ show i)
-
-
+-- Arg instances -------------------------------------------------------------------------------------------------------------------
+-- |
 -- instance FormatItem
 instance (FormatItem a, FormatArg b) => FormatArg (a -> b) where
   collect others arg = collect (wrap arg : others)
 
 
+-- |
 instance FormatArg [FormatWrapper] where
   collect others = others
 
 
--- instance (Arg b) => Arg (String -> b) where
-  -- apply' frmt s = apply' (frmt ++ s)
+-- Item instances --------------------------------------------------------------------------------------------------------------------------
+instance (FormatItem it, Integral i, IsString s) => FormatItem (Key i s, it) where
+    wrap   = uncurry FormatWrapper
+    format spec (_, it) = format spec it
 
 
--- instance (Arg a, Arg b) => Arg ((->) a b) where
---   apply' frmt a = apply' (format frmt a) a
---   format = const
-
-
--- instance Arg Int where
-  -- format frmt i = frmt ++ show i
-
-
--- instance Arg String where
-  -- apply' :: Arg b => String -> String -> b
-  -- apply' frmt = frmt
-  -- format frmt s = frmt ++ s
+instance FormatItem String where
+  wrap   = FormatWrapper EmptyKey
+  format = undefined
