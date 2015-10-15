@@ -61,6 +61,12 @@ data Specifier = Specifier String deriving (Show, Eq)
 
 
 -- |
+-- TODO: Meaningful errors
+-- TODO: Rename or create two separate error types (for interpolation mishaps)
+data FormatError = InvalidFormat | MissingKey Key deriving (Eq, Show)
+
+
+-- |
 type Format = (Key, Specifier)
 
 --------------------------------------------------------------------------------------------------------------------------------------------
